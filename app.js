@@ -7,6 +7,7 @@
  const ejsMate = require('ejs-mate');
  const wrapAsync = require('./utils/wrapAsync.js');
  const ExpressError = require('./utils/ExpressError.js');
+ const {listingSchema} = require('./schema.js');  //Joi schema 51 validation for schema
 
 
 app.use(methodOverride('_method'));
@@ -29,9 +30,24 @@ async function main() {
 
  }
 
+ //jio validation middleware in schema.js file 
+const validateListing = (req,res,next)=>{   
+    console.log("✅ validateListing middleware HIT");
+  console.log("req.body =", req.body);
+
+    let {error} =  listingSchema.validate(req.body);
+    if(error){
+        let errMsg = error.details.map(el=>el.message).join(',');
+        throw new ExpressError(400,errMsg);
+    }else{
+        next();
+    }
+}
+ 
+
  //index Route
 app.get("/listing", wrapAsync(async (req,res)=>{
-  const allListings = await Listing.find({});
+  const allListings = await Listing.find({}); 
   res.render("./listing/index.ejs",{allListings});
 }));
 //New Route
@@ -39,12 +55,16 @@ app.get("/listing/new", (req,res)=>{
     res.render("listing/new.ejs");
 });
 //Create Route
-app.post("/listing", wrapAsync(  async(req,res,next)=>{
-    // const{title, description,img,price,location,country} = req.body;
-    if(!req.body.listing) {
-        throw new ExpressError(400, "Invalid Listing Data");
-    }
-     let listing = req.body.listing;
+app.post("/listing",validateListing, wrapAsync(  async(req,res,next)=>{
+  // const{title, description,img,price,location,country} = req.body;
+
+
+//   let result =  listingSchema.validate(req.body);
+//     console.log(result);
+//     if(result.error){
+//         throw new ExpressError(400, result.error);
+//     }
+   let listing = req.body.listing;
    const newListing = new Listing(listing);
    await newListing.save();
     res.redirect("/listing");
@@ -67,15 +87,14 @@ app.get("/listing/:id/edit",wrapAsync(async(req,res)=>{
 }))
 //
 //update route
-app.put("/listing/:id", wrapAsync(async(req,res)=>{
-    if(!req.body.listing) {
-        throw new ExpressError(400, "Invalid Listing Data");
-    }
+app.put("/listing/:id",validateListing,  wrapAsync(async(req,res)=>{
     //first
     const {id} = req.params;
  const listing = await Listing.findByIdAndUpdate(id, {...req.body.listing});
  res.redirect(`/listing/${id}`);
 }));
+
+
 //Delete Route
 app.delete("/listing/:id",wrapAsync(async(req,res)=>{
     const {id} = req.params;
@@ -107,12 +126,13 @@ app.delete("/listing/:id",wrapAsync(async(req,res)=>{
 
 //error handling middleware
 app.use((req,res,next)=>{      //insterd os app.all('*'....)
-    next( new ExpressError(404, "Page Not Found"));
+    next( new ExpressError(404, "Page Not Found!"));
 });
 
  app.use((err,req,res,next)=>{
     let {statusCode=500,message="something went wrong!"} = err;
-    res.status(statusCode).send(message);
+    res.status(statusCode).render("err.ejs",{err});
+    // res.status(statusCode).send(message);
 })
 
  let port = 1009;
