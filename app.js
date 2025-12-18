@@ -7,7 +7,9 @@
  const ejsMate = require('ejs-mate');
  const wrapAsync = require('./utils/wrapAsync.js');
  const ExpressError = require('./utils/ExpressError.js');
- const {listingSchema} = require('./schema.js');  //Joi schema 51 validation for schema
+ const {listingSchema, reviewSchema} = require('./schema.js');  //Joi schema 51 validation for schema
+  const Review = require('./models/review');
+
 
 
 app.use(methodOverride('_method'));
@@ -32,17 +34,26 @@ async function main() {
 
  //jio validation middleware in schema.js file 
 const validateListing = (req,res,next)=>{   
-    console.log("✅ validateListing middleware HIT");
-  console.log("req.body =", req.body);
-
     let {error} =  listingSchema.validate(req.body);
     if(error){
-        let errMsg = error.details.map(el=>el.message).join(',');
+        let errMsg = error.details.map((el)=>el.message).join(",");
         throw new ExpressError(400,errMsg);
     }else{
         next();
     }
 }
+
+const validateReview = (req,res,next)=>{   
+
+    let {error} =  reviewSchema.validate(req.body);
+    if(error){
+        let errMsg = error.details.map((el)=>el.message).join(',');
+        throw new ExpressError(400,errMsg);
+    }else{
+        next();
+    }
+}   
+    
  
 
  //index Route
@@ -64,6 +75,7 @@ app.post("/listing",validateListing, wrapAsync(  async(req,res,next)=>{
 //     if(result.error){
 //         throw new ExpressError(400, result.error);
 //     }
+
    let listing = req.body.listing;
    const newListing = new Listing(listing);
    await newListing.save();
@@ -75,7 +87,7 @@ app.post("/listing",validateListing, wrapAsync(  async(req,res,next)=>{
 //show route
 app.get("/listing/:id", wrapAsync(async(req,res)=>{
     const {id} = req.params;
- const listing = await Listing.findById(id)
+ const listing = await Listing.findById(id).populate('review');
  res.render("listing/show.ejs",{listing});
 }));
 
@@ -89,7 +101,7 @@ app.get("/listing/:id/edit",wrapAsync(async(req,res)=>{
 //update route
 app.put("/listing/:id",validateListing,  wrapAsync(async(req,res)=>{
     //first
-    const {id} = req.params;
+    let {id} = req.params;
  const listing = await Listing.findByIdAndUpdate(id, {...req.body.listing});
  res.redirect(`/listing/${id}`);
 }));
@@ -102,6 +114,30 @@ app.delete("/listing/:id",wrapAsync(async(req,res)=>{
     console.log(deletedListing);
     res.redirect("/listing");
 
+}));
+
+//Review Create Route
+app.post("/listing/:id/reviews",validateReview, wrapAsync( async(req,res)=>{
+    let listing = await Listing.findById(req.params.id);
+    let newReview = new Review(req.body.review);
+
+     listing.review.push(newReview);
+    
+    await newReview.save();
+    await listing.save();
+    // console.log("New Review Added");
+    // res.send("Review added successfully");
+    res.redirect(`/listing/${listing._id}`);
+}));
+
+//Review Delete Route
+app.delete("/listing/:id/reviews/:reviewId", wrapAsync( async(req,res)=>{
+    let {id, reviewId} = req.params;
+   await Listing.findByIdAndUpdate(id, {$pull: {review: reviewId}});  //pull operator to remove review from listing array
+    await Review.findByIdAndDelete(reviewId);
+
+    res.redirect(`/listing/${id}`);
+ 
 }));
 
 
@@ -131,7 +167,7 @@ app.use((req,res,next)=>{      //insterd os app.all('*'....)
 
  app.use((err,req,res,next)=>{
     let {statusCode=500,message="something went wrong!"} = err;
-    res.status(statusCode).render("err.ejs",{err});
+    res.status(statusCode).render("err.ejs",{message});
     // res.status(statusCode).send(message);
 })
 
