@@ -7,18 +7,15 @@ const Listing = require('../models/listing.js');
 
 
 //jio validation middleware in schema.js file 
-const validateListing = (req,res,next)=>{   
-    let {error} =  listingSchema.validate(req.body);
-    if(error){
-        let errMsg = error.details.map((el)=>el.message).join(",");
-        throw new ExpressError(400,errMsg);
-    }else{
+const validateListing = (req, res, next) => {
+    let { error } = listingSchema.validate(req.body);
+    if (error) {
+        let errMsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, errMsg);
+    } else {
         next();
     }
-}
-
-
-
+};
 
 //index Route
 router.get("/", wrapAsync(async (req, res) => {   // app.get to router.get
@@ -45,6 +42,7 @@ router.post("/", validateListing, wrapAsync(async (req, res, next) => {
     let listing = req.body.listing;
     const newListing = new Listing(listing);
     await newListing.save();
+    req.flash('success', 'Successfully made a new listing!');//flash message
     res.redirect("/listing");
 }
 
@@ -55,6 +53,10 @@ router.post("/", validateListing, wrapAsync(async (req, res, next) => {
 router.get("/:id", wrapAsync(async (req, res) => {
     const { id } = req.params;
     const listing = await Listing.findById(id).populate('review');
+    if (!listing) {
+        req.flash('error', 'Cannot find that listing!');//flash message
+        return res.redirect('/listing');
+    };
     res.render("listing/show.ejs", { listing });
 }));
 
@@ -62,6 +64,10 @@ router.get("/:id", wrapAsync(async (req, res) => {
 router.get("/:id/edit", wrapAsync(async (req, res) => {
     const { id } = req.params;
     const listing = await Listing.findById(id)
+    if (!listing) {
+        req.flash('error', 'Cannot find that listing!');//flash message
+        return res.redirect('/listing');
+    };
     res.render("listing/edit.ejs", { listing });
 }))
 
@@ -71,6 +77,9 @@ router.put("/:id", validateListing, wrapAsync(async (req, res) => {
     //first
     let { id } = req.params;
     const listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+    
+    req.flash('success', 'listing was updated!');//flash message
+
     res.redirect(`/listing/${id}`);
 }));
 
@@ -79,7 +88,9 @@ router.put("/:id", validateListing, wrapAsync(async (req, res) => {
 router.delete("/:id", wrapAsync(async (req, res) => {
     const { id } = req.params;
     let deletedListing = await Listing.findByIdAndDelete(id);
-    console.log(deletedListing);
+    req.flash('success', ' listing was deleted!');//flash message
+
+    // console.log(deletedListing);
     res.redirect("/listing");
 
 }));

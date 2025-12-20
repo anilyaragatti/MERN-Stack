@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router({mergeParams: true});
+const router = express.Router({ mergeParams: true });
 const wrapAsync = require('../utils/wrapAsync.js');
 const ExpressError = require('../utils/ExpressError.js');
 const { reviewSchema } = require('../schema.js');  //Joi schema 51 validation for schema
@@ -9,16 +9,16 @@ const Review = require('../models/review.js');
 
 //jio validation middleware in schema.js file
 
-const validateReview = (req,res,next)=>{   
+const validateReview = (req, res, next) => {
 
-    let {error} =  reviewSchema.validate(req.body);
-    if(error){
-        let errMsg = error.details.map((el)=>el.message).join(',');
-        throw new ExpressError(400,errMsg);
-    }else{
+    let { error } = reviewSchema.validate(req.body);
+    if (error) {
+        let errMsg = error.details.map((el) => el.message).join(',');
+        throw new ExpressError(400, errMsg);
+    } else {
         next();
     }
-}   
+}
 
 
 
@@ -31,6 +31,8 @@ router.post("/", validateReview, wrapAsync(async (req, res) => {
 
     await newReview.save();
     await listing.save();
+    req.flash('success', 'new Review added!');//flash message
+
     // console.log("New Review Added");
     // res.send("Review added successfully");
     res.redirect(`/listing/${listing._id}`);
@@ -41,6 +43,8 @@ router.delete("/:reviewId", wrapAsync(async (req, res) => {
     let { id, reviewId } = req.params;
     await Listing.findByIdAndUpdate(id, { $pull: { review: reviewId } });  //pull operator to remove review from listing array
     await Review.findByIdAndDelete(reviewId);
+        req.flash('success', 'Review Deleted!');//flash message
+
 
     res.redirect(`/listing/${id}`);
 
