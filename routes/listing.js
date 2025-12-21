@@ -47,7 +47,7 @@ router.post("/", isLoggedIn, validateListing, wrapAsync(async (req, res, next) =
 //show route
 router.get("/:id", wrapAsync(async (req, res) => {
     const { id } = req.params;
-    const listing = await Listing.findById(id).populate('review').populate('owner');
+    const listing = await Listing.findById(id).populate({path:'review',populate:{path:'author'}}).populate('owner'); //nested populate to get author of each review
     if (!listing) {
         req.flash('error', 'Cannot find that listing!');//flash message
         return res.redirect('/listing');

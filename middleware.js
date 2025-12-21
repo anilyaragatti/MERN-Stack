@@ -1,4 +1,5 @@
 const Listing = require('./models/listing');
+const Review = require('./models/review');
 const ExpressError = require('./utils/ExpressError.js');
 const { listingSchema } = require('./schema.js');  //Joi schema 51 validation for schema
 const { reviewSchema } = require('./schema.js');  //Joi schema 51 validation for schema
@@ -49,11 +50,23 @@ module.exports.saveRedirectUrl = (req, res, next) => {
     next();
 };
 
-
+//middleware to check if logged in user is owner of the listing
 module.exports.isOwner = async (req, res, next) => {
     let { id } = req.params;
     const listing = await Listing.findById(id);//
     if (!listing.owner._id.equals(res.locals.currentUser._id)) {     //authorization check
+        req.flash('error', 'You do not have permission to do that!');
+        return res.redirect(`/listing/${id}`);
+    }
+    next();
+
+}
+
+
+module.exports.isReviewAuthor = async (req, res, next) => {
+    let { id, reviewId } = req.params;
+    const review = await Review.findById(reviewId);
+    if (!review.author._id.equals(res.locals.currentUser._id)) {     //authorization check
         req.flash('error', 'You do not have permission to do that!');
         return res.redirect(`/listing/${id}`);
     }
