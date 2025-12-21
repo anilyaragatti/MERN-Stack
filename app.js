@@ -45,7 +45,7 @@ async function main() {
  }
 
  //session configuration
-const sessionOptions = {
+const sessionOptions = { 
     secret: 'musupersecrecode',
     resave: false,
     saveUninitialized: true,
@@ -56,6 +56,7 @@ const sessionOptions = {
     }
 };
 
+//using session and flash middleware
 app.use(session(sessionOptions));
 app.use(flash());
 

@@ -12,11 +12,12 @@ main().then((res)=>{
 })
 async function main() {
   await mongoose.connect(MONGO_URL);
-
- }
+}
+ 
 
  const initDB = async()=>{
     await Listing.deleteMany({});
+    initdata.data = initdata.data.map((obj)=>({...obj,owner:"6947cb531fe51833ff6ec246"})) // Assigning a default owner ID to each listing
     await Listing.insertMany(initdata.data);
     console.log("Deleted all existing listings");
 };
