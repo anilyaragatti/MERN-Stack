@@ -16,7 +16,7 @@
     },
     price: Number,
     location: String,
-    cointry: String,
+    country: String,
     review:[{
         type:Schema.Types.ObjectId,
         ref:'Review',

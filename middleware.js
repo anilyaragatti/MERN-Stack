@@ -45,7 +45,7 @@ module.exports.isLoggedIn = (req, res, next) => {
 //middleware to save the url user wanted to access
 module.exports.saveRedirectUrl = (req, res, next) => {
     if (req.session.redirectUrl) {
-        res.locals.redirectUrl = req.session.redirectUrl;
+        res.locals.redirectUrl = req.session.redirectUrl;//make it available in res.locals for access in controller
     }
     next();
 };
@@ -62,7 +62,7 @@ module.exports.isOwner = async (req, res, next) => {
 
 }
 
-
+//middleware to check if logged in user is author of the review
 module.exports.isReviewAuthor = async (req, res, next) => {
     let { id, reviewId } = req.params;
     const review = await Review.findById(reviewId);
