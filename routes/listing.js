@@ -4,33 +4,57 @@ const wrapAsync = require('../utils/wrapAsync.js');
 const ExpressError = require('../utils/ExpressError.js');
 const { listingSchema } = require('../schema.js');  //Joi schema 51 validation for schema
 const Listing = require('../models/listing.js');
-const { isLoggedIn,isOwner,validateListing } = require('../middleware.js');
+const { isLoggedIn, isOwner, validateListing } = require('../middleware.js');
+const listingController = require('../controllers/listing.js');//import listing controller
+//multer for file uploads
+const multer  = require('multer')
+const { storage } = require('../cloudConfig.js');
+const upload = multer({storage })
 
-const listingController = require('../controllers/listing.js');
- 
+
 //jio validation middleware in schema.js file 
 
-
-//index Route
-router.get("/", wrapAsync(listingController.index));
+//Routes for listings
+router.route("/")
+    .get(wrapAsync(listingController.index))// index Route
+    .post(isLoggedIn, validateListing,upload.single('listing[image]'), wrapAsync(listingController.createListing));    //Create Route 
 
 //New Route
-router.get("/new", isLoggedIn,listingController.renderNewForm);
-
-//Create Route
-router.post("/", isLoggedIn, validateListing, wrapAsync(listingController.createListing));
-
-//show route
-router.get("/:id", wrapAsync(listingController.showListing));
+router.get("/new", isLoggedIn, listingController.renderNewForm);
 
 //edit route
-router.get("/:id/edit", isLoggedIn,isOwner,  wrapAsync(listingController.renderEditForm));
+router.get("/:id/edit", isLoggedIn, isOwner, wrapAsync(listingController.renderEditForm));
 
-//update route
-router.put("/:id", isLoggedIn, isOwner, validateListing, wrapAsync(listingController.updateListing));
+router.route("/:id")
+    .get(wrapAsync(listingController.showListing))//show route
+    .put(isLoggedIn, isOwner,upload.single('listing[image]'), validateListing, wrapAsync(listingController.updateListing))//update route
+    .delete(isLoggedIn, isOwner, wrapAsync(listingController.deleteListing))//Delete Route
 
 
-//Delete Route
-router.delete("/:id",isLoggedIn,isOwner,wrapAsync(listingController.deleteListing));
+
+
+
+
+// //index Route
+// router.get("/", wrapAsync(listingController.index));
+
+//New Route
+// router.get("/new", isLoggedIn,listingController.renderNewForm);
+
+// //Create Route
+// router.post("/", isLoggedIn, validateListing, wrapAsync(listingController.createListing));
+
+// //show route
+// router.get("/:id", wrapAsync(listingController.showListing));
+
+//edit route
+// router.get("/:id/edit", isLoggedIn,isOwner,  wrapAsync(listingController.renderEditForm));
+
+// //update route
+// router.put("/:id", isLoggedIn, isOwner, validateListing, wrapAsync(listingController.updateListing));
+
+
+// //Delete Route
+// router.delete("/:id",isLoggedIn,isOwner,wrapAsync(listingController.deleteListing));
 
 module.exports = router;

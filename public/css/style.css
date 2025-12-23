@@ -93,6 +93,18 @@ text-decoration: underline;
 .show-img{
     height: 30vh;
 }
+
+/* edit page image - keep it small and responsive */
+.edit-img{
+    width: 300px !important; /* explicitly set width to ensure it stays 200px */
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: 0.5rem;
+    margin-left: 2px !important;
+ }
+
 .btns{
     display: flex;
 }

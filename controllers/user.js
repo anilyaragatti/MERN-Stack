@@ -36,7 +36,8 @@ module.exports.renderLoginForm = (req, res) => {
 // Handle user login
 module.exports.login = async (req, res) => {
     req.flash('success', 'Welcome back to wondeLust!');
-    res.redirect(res.locals.redirectUrl || "/listing");//redirect to the url user wanted to access before login
+    let redirectUrl = res.locals.redirectUrl || "/listing";
+    res.redirect(redirectUrl);//redirect to the url user wanted to access before login
 };
 
 // Handle user logout

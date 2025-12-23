@@ -1,6 +1,7 @@
  const mongoose = require('mongoose');
  const Schema = mongoose.Schema;
  const Review = require('./review.js');
+const { urlencoded } = require('body-parser');
 
  const listingSchema = new Schema({
     title: {
@@ -9,10 +10,8 @@
     },
     description: String,
     image: {
-        type: String,
-        default: "https://unsplash.com/photos/silhouette-of-trees-during-sunset-AbicQtsFWUk link",
-        set: (v)=> v===" "? "https://unsplash.com/photos/silhouette-of-trees-during-sunset-AbicQtsFWUk link": v,
-    
+         url: String,
+         filename: String,
     },
     price: Number,
     location: String,

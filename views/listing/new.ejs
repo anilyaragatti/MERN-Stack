@@ -6,7 +6,7 @@
 
 
             <h3>Create a New Listing</h3>
-            <form method="POST" action="/listing" novalidate class="needs-validation">
+            <form method="POST" action="/listing" novalidate class="needs-validation" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label for="title" class="form-label">Title</label>
                     <input name="listing[title]" placeholder="add a catchy title" type="text" class="form-control"
@@ -20,15 +20,16 @@
                     <div class="invalid-feedback">Please enter the short description</div>
                 </div>
 
+                <!-- first i use type text but to upload image we need to use type file -->
                 <div class="mb-3">
-                    <label for="image" class="form-label">Image URL</label>
-                    <input name="listing[image]" placeholder="enter image URL/Link" type="text" class="form-control">
+                    <label for="image" class="form-label">Upload Image</label>    
+                    <input name="listing[image]" type="file" class="form-control" required>
                 </div>
 
                 <div class="row">
                     <div class="mb-3 col-md-4">
                         <label for="price" class="form-label">Price</label>
-                        <input name="listing[price]" placeholder="1200"  class="form-control" required>
+                        <input name="listing[price]" placeholder="1200" class="form-control" required>
                         <div class="invalid-feedback"> price should be valid</div>
                     </div>
 
