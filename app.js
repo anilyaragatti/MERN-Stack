@@ -2,8 +2,6 @@ if(process.env.NODE_ENV != 'production'){
     require('dotenv').config();
 }
  
-
-
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
@@ -16,8 +14,6 @@ const flash = require('connect-flash');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user.js');
-
-
 //BCZ WE MOVED THESE TO ROUTES FILES
 //  const Listing = require('./models/listing');
 //  const wrapAsync = require('./utils/wrapAsync.js');
@@ -101,10 +97,9 @@ app.use('/listing/:id/reviews', reviewRoutes);
 //using user routes
 app.use('/', userRoutes);
 
-app.get("/", (req, res) => {
-    res.send("Hi, I am root");
-});
-
+// app.get("/", (req, res) => {
+//     res.send("Hi, I am root");
+// });
 // app.get("/testListing", async(req, res)=>{
 //     const sampleListing = new Listing({
 //         title: "My New Listing",

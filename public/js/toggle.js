@@ -1,0 +1,10 @@
+      let taxSwitch = document.getElementById('switchCheckDefault');
+      taxSwitch.addEventListener("click", ()=>{
+        let taxInfo = document.getElementsByClassName('tax-info');
+        for(let info of taxInfo){
+          if(taxSwitch.checked)
+            info.style.display = "inline"
+          else
+          info.style.display = "none"
+        }
+        })
