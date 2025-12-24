@@ -117,25 +117,24 @@ text-decoration: underline;
 
 
 /* search bar style */
-/* more specific selectors to override Bootstrap (.btn and .form-control) */
-.btn.search-btn{
+.search-btn{
     background-color: #fe424d;
     color: #fff;
     border-radius: 25px;
-    padding: 0 1rem;
-    border: none;
-}
-.btn.search-btn:hover{
-    background-color: #e63a42;
+    padding: 0 1rem 0 1rem;
+  }
+  .search-btn:hover{
+    background-color: #fe424d;
     color: #fff;
-}
-.btn.search-btn i{
+
+  }
+  .search-btn i{
     display: inline;
     margin-right: 0.5rem;
-}
+  }
 
-.form-control.search-inp{
+  .search-inp{
     border-radius: 25px;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 3rem 0.5rem 3rem;
     font-size: 1rem;
-}
+  }
