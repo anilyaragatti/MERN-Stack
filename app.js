@@ -1,7 +1,7 @@
-if(process.env.NODE_ENV != 'production'){
+if (process.env.NODE_ENV != 'production') {
     require('dotenv').config();
 }
- 
+
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
@@ -37,38 +37,30 @@ app.engine('ejs', ejsMate);
 app.use(express.static(path.join(__dirname, '/public')));
 
 //MongoDB connection
-// const MONGO_URL = 'mongodb://127.0.0.1:27017/wanderlust'
-const dnurl = process.env.ATLASDB_URL 
+const MONGO_URL = 'mongodb://127.0.0.1:27017/wanderlust';
+const dnurl = process.env.ATLASDB_URL;
 
-main().then((res) => {
-    console.log("Connected to MongoDB");
-}).catch((err) => {
-    console.log("Error connecting to MongoDB", err);
-})
+main().then(() => {
+    console.log("Connected to MongoDB Atlas");
+}).catch(async (err) => {
+    console.log("Error connecting to MongoDB Atlas. Attempting to connect to Local MongoDB...");
+    try {
+        await mongoose.connect(MONGO_URL);
+        console.log("Successfully connected to Local MongoDB");
+    } catch (localErr) {
+        console.log("Error connecting to Local MongoDB:", localErr);
+    }
+});
+
 async function main() {
     await mongoose.connect(dnurl);
 }
 
 
-const store = MongoStore.create({
-    mongoUrl:dnurl,
-    crypto:{
-        secret:process.env.SECREAT,
-    },
-    touchAfter:24*3600
-
-});
-
-store.on("error", ()=>{
-    console.log("ERROR IN MONGO SESSION STORE", err)
-});
-
-
 
 //session configuration
 const sessionOptions = {
-    store,
-    secret: process.env.SECREAT,
+    secret: process.env.SECREAT || 'thisshouldbeabettersecret',
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -142,8 +134,10 @@ app.use((req, res, next) => {      //insterd os app.all('*'....)
 
 app.use((err, req, res, next) => {
     let { statusCode = 500, message = "something went wrong!" } = err;
+    res.locals.currentUser = req.user || null;
+    res.locals.success = res.locals.success || [];
+    res.locals.error = res.locals.error || [];
     res.status(statusCode).render("err.ejs", { message });
-    // res.status(statusCode).send(message);
 })
 
 let port = 1009;
